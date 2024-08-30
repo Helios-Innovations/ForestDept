@@ -1,50 +1,44 @@
 import React, { useState } from "react";
-import Navbar from "./Navbar"; // Import the Navbar component
+import Navbar from "./Navbar";
 import "./App.css";
 import axios from 'axios';
+import { Footer } from "./Footer";
 
-// Updated services array with more booking options
 const services = [
-  { id: 1, name: "Tree Cutting Permit", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1 },
-  { id: 2, name: "Wildlife Safari (Indian)", image: "https://media.istockphoto.com/id/598520904/photo/green-forest-foliage-aerial-view-woodland-tree-canopy-nature-background.jpg?s=2048x2048&w=is&k=20&c=ymqZTFwlLU1ZXH6KZipayaSJZ_yJgXOFBmLuNHMJftI=", price: 1 },
-  { id: 3, name: "Wildlife Safari (Foreigner)", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1},
-  { id: 4, name: "Forest Camping", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1},
-  { id: 5, name: "Fishing License", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1 },
-  { id: 6, name: "Car Booking for Safari (Indian)", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1 },
-  { id: 7, name: "Car Booking for Safari (Foreigner)", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1},
-  { id: 8, name: "2-Wheeler Booking", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1},
-  { id: 9, name: "Tour Guide (Half Day)", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1},
-  { id: 10, name: "Tour Guide (Full Day)", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1},
-  { id: 11, name: "Bird Watching Tour", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1},
-  { id: 12, name: "Nature Photography Workshop", image: "https://t4.ftcdn.net/jpg/02/55/17/43/360_F_255174366_ojDuATz84e5h7lIlxh2moUJa9Kpd5wKk.jpg", price: 1},
+  { id: 1, name: "Adult", domesticPrice: 30, foreignPrice: 200 },
+  { id: 2, name: "Children/Student", domesticPrice: 15, foreignPrice: 100 },
+  { id: 3, name: "Educational Tour Group of 30 Nos & above", domesticPrice: 40, foreignPrice: 100 },
+  { id: 4, name: "Persons for own Academy Study/Research", domesticPrice: 1000, foreignPrice: 5000 },
+  { id: 5, name: "Occupation of Forest I.B", domesticPrice: 1000, foreignPrice: 5000 },
+  { id: 6, name: "Use of still/digital camera", domesticPrice: 200, foreignPrice: 500 },
+  { id: 7, name: "Video Camera", domesticPrice: 1000, foreignPrice: 250 },
+  { id: 8, name: "Boating", domesticPrice: 50, foreignPrice: 250 },
+  { id: 9, name: "Light vehicle (Up to 10 seat capacity)", domesticPrice: 100, foreignPrice: 500 },
 ];
-
-const ServiceCard = ({ service, onAdd, onRemove, isSelected }) => {
-  return (
-    <div className="card">
-      <img src={service.image} alt={service.name} className="card-image" />
-      <div className="card-content">
-        <h3>{service.name}</h3>
-        <p>Price: ₹{service.price}</p>
-        {isSelected ? (
-          <button onClick={() => onRemove(service)} className="remove-button">-</button>
-        ) : (
-          <button onClick={() => onAdd(service)} className="add-button">+</button>
-        )}
-      </div>
-    </div>
-  );
-};
 
 function Home() {
   const [selectedServices, setSelectedServices] = useState([]);
+  const [userInfo, setUserInfo] = useState({
+    name: "",
+    contact: "",
+    email: ""
+  });
 
-  const addService = (service) => {
-    setSelectedServices([...selectedServices, service]);
+  const addService = (service, type) => {
+    const serviceWithPrice = {
+      ...service,
+      type,
+      price: type === "domestic" ? service.domesticPrice : service.foreignPrice
+    };
+    setSelectedServices([...selectedServices, serviceWithPrice]);
   };
 
-  const removeService = (service) => {
-    setSelectedServices(selectedServices.filter(s => s.id !== service.id));
+  const removeService = (service, type) => {
+    setSelectedServices(
+      selectedServices.filter(
+        (s) => !(s.id === service.id && s.type === type)
+      )
+    );
   };
 
   const amount = selectedServices.reduce((sum, service) => sum + service.price, 0);
@@ -54,12 +48,14 @@ function Home() {
       const { data: { key } } = await axios.get("http://localhost:5000/api/getkey");
 
       const { data: { order } } = await axios.post("http://localhost:5000/api/v1/checkout", {
-        amount
+        amount,
+        userInfo,
+        services: selectedServices
       });
 
       const options = {
         key,
-        amount: order.amount,
+        amount: order.amount * 100,
         currency: "INR",
         name: "Forest",
         description: "Payment integration",
@@ -67,9 +63,9 @@ function Home() {
         order_id: order.id,
         callback_url: `http://localhost:5000/api/v1/paymentverification`,
         prefill: {
-          name: "Prashant Kumar Jha",
-          email: "jhakumarprasant111@gmail.com",
-          contact: "9999999999"
+          name: userInfo.name,
+          email: userInfo.email,
+          contact: userInfo.contact
         },
         notes: {
           "address": "Razorpay Corporate Office"
@@ -82,7 +78,6 @@ function Home() {
       const razor = new window.Razorpay(options);
       razor.on('payment.success', function (response) {
         console.log('Payment successful', response);
-        // addOrderToDatabase(options);
       });
 
       razor.on('payment.error', function (response) {
@@ -98,24 +93,69 @@ function Home() {
   return (
     <div className="App">
       <Navbar />
-      <div className="services-container">
-        {services.map((service) => {
-          const isSelected = selectedServices.some(s => s.id === service.id);
-          return (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              onAdd={addService}
-              onRemove={removeService}
-              isSelected={isSelected}
-            />
-          );
-        })}
+      <div className="table-container">
+        <table className="service-table">
+          <thead>
+            <tr>
+              <th>Sl. No</th>
+              <th>Classification</th>
+              <th>Domestic Rate (₹)</th>
+              <th>Add (Domestic)</th>
+              <th>Foreign Rate (₹)</th>
+              <th>Add (Foreign)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {services.map((service, index) => (
+              <tr key={service.id}>
+                <td>{index + 1}</td>
+                <td>{service.name}</td>
+                <td>₹{service.domesticPrice}</td>
+                <td>
+                  {selectedServices.some(s => s.id === service.id && s.type === "domestic") ? (
+                    <button onClick={() => removeService(service, "domestic")} className="remove-button">-</button>
+                  ) : (
+                    <button onClick={() => addService(service, "domestic")} className="add-button">+</button>
+                  )}
+                </td>
+                <td>₹{service.foreignPrice}</td>
+                <td>
+                  {selectedServices.some(s => s.id === service.id && s.type === "foreign") ? (
+                    <button onClick={() => removeService(service, "foreign")} className="remove-button">-</button>
+                  ) : (
+                    <button onClick={() => addService(service, "foreign")} className="add-button">+</button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
       <div className="checkout-section">
         <h2>Total Price: ₹{amount}</h2>
+        <div className="user-info">
+          <input
+            type="text"
+            placeholder="Name"
+            value={userInfo.name}
+            onChange={(e) => setUserInfo({ ...userInfo, name: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Contact Number"
+            value={userInfo.contact}
+            onChange={(e) => setUserInfo({ ...userInfo, contact: e.target.value })}
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={userInfo.email}
+            onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+          />
+        </div>
         <button className="checkout-button" onClick={checkoutHandler}>Checkout</button>
       </div>
+      <Footer/>
     </div>
   );
 }
