@@ -27,7 +27,7 @@ const orderSchema = new mongoose.Schema({
   razorpay_signature: {
     type: String,
   },
-});
+},{timestamps:true});
 
 const Order = mongoose.model("Order", orderSchema);
 module.exports = Order;

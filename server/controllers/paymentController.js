@@ -111,3 +111,22 @@ exports.getBookingDetails=async(req,res)=>{
     });
   }
 }
+
+exports.getAllTransactions=async(req,res)=>{
+    try{
+      console.log("hi")
+      const allTransactions=await Order.find();
+      res.status(200).json({
+        success:true,
+        allTransactions
+      })
+
+    }
+    catch(error){
+      res.status(500).json({
+        success: false,
+        message: 'Server Error',
+        error: error.message,
+      });
+    }
+}

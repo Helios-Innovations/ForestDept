@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import Navbar from "./Navbar";
+// import Navbar from "./Navbar";
 import "./App.css";
 import axios from 'axios';
-import { Footer } from "./Footer";
-
+// import { Footer } from "./Footer";
+import { baseURL } from "./baseurl";
 const services = [
   { id: 1, name: "Adult", domesticPrice: 30, foreignPrice: 200 },
   { id: 2, name: "Children/Student", domesticPrice: 15, foreignPrice: 100 },
@@ -45,9 +45,9 @@ function Home() {
 
   async function checkoutHandler() {
     try {
-      const { data: { key } } = await axios.get("http://localhost:5000/api/getkey");
+      const { data: { key } } = await axios.get(`${baseURL}/api/getkey`);
 
-      const { data: { order } } = await axios.post("http://localhost:5000/api/v1/checkout", {
+      const { data: { order } } = await axios.post(`${baseURL}/api/v1/checkout`, {
         amount,
         userInfo,
         services: selectedServices
@@ -61,7 +61,7 @@ function Home() {
         description: "Payment integration",
         image: "https://logo.com/image-cdn/images/kts928pd/production/396f6f3c7f506eb9674c2a6e244249faeda83b00-424x419.png?w=1080&q=72",
         order_id: order.id,
-        callback_url: `http://localhost:5000/api/v1/paymentverification`,
+        callback_url: `${baseURL}/api/v1/paymentverification`,
         prefill: {
           name: userInfo.name,
           email: userInfo.email,
@@ -92,7 +92,7 @@ function Home() {
 
   return (
     <div className="App">
-      <Navbar />
+      
       <div className="table-container">
         <table className="service-table">
           <thead>
@@ -155,7 +155,7 @@ function Home() {
         </div>
         <button className="checkout-button" onClick={checkoutHandler}>Checkout</button>
       </div>
-      <Footer/>
+     
     </div>
   );
 }

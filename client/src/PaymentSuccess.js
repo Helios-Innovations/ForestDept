@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import './PaymentSuccess.css'; // Import your CSS file
+import './PaymentSuccess.css'; 
 import axios from 'axios';
 import jsPDF from 'jspdf';
+import { baseURL } from './baseurl';
 
 const PaymentSuccess = () => {
   const [order, setOrder] = useState(null);
@@ -13,7 +14,7 @@ const PaymentSuccess = () => {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/${referenceNum}`);
+        const response = await axios.get(`${baseURL}/api/v1/${referenceNum}`);
         const data = response.data; 
         if (data.success) {
           setOrder(data.order);
